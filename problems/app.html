@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Lista de tareas</title>
+    <style>
+      /* Estilos CSS para la tabla */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th, td {
+        text-align: left;
+        padding: 8px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+
+      th {
+        background-color: #4CAF50;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Lista de tareas</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Tarea</th>
+          <th>Prioridad</th>
+        </tr>
+      </thead>
+      <tbody id="task-list">
+        <!-- Aquí se agregarán las tareas dinámicamente -->
+      </tbody>
+    </table>
+    <script>
+      // Arreglo con las tareas (aquí debería obtenerse desde el backend)
+      const tasks = [
+        { name: 'Hacer la compra', priority: 'alta' },
+        { name: 'Limpiar la casa', priority: 'media' },
+        { name: 'Ir al médico', priority: 'baja' },
+      ];
+
+      // Función para mostrar las tareas en la tabla
+      function renderTaskList() {
+        const taskList = document.getElementById('task-list');
+        taskList.innerHTML = '';
+
+        tasks.forEach(task => {
+          const row = document.createElement('tr');
+          const taskNameCell = document.createElement('td');
+          const priorityCell = document.createElement('td');
+
+          taskNameCell.innerText = task.name;
+          priorityCell.innerText = task.priority;
+
+          row.appendChild(taskNameCell);
+          row.appendChild(priorityCell);
+          taskList.appendChild(row);
+        });
+      }
+
+      // Llamamos a la función al cargar la página
+      renderTaskList();
+    </script>
+  </body>
+</html>

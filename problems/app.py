@@ -26,6 +26,7 @@ class Assignee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     tasks = db.relationship('Task', backref='assignee', lazy=True)
+    
 # Definir una lista de tareas como una variable global
 tasks = [
     {
