@@ -88,5 +88,21 @@ def delete_task(task_id):
     tasks.remove(task[0])
     return jsonify({'result': True})
 
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    priority = db.Column(db.Integer, nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+    tags = db.relationship('Tag', backref='task', lazy=True)
+
+    def __repr__(self):
+        return '<Task %r>' % self.title
+
+@app.route('/tasks')
+def get_tasks():
+    tasks = Task.query.all()
+    return jsonify([task.__dict__ for task in tasks])
+
+
 if __name__ == '__main__':
     app.run(debug=True)

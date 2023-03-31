@@ -39,6 +39,17 @@
       </tbody>
     </table>
     <script>
+
+      import axios from 'axios';
+      
+      axios.get('/tasks')
+        .then(response => {
+          console.log(response.data);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+
       // Arreglo con las tareas (aquí debería obtenerse desde el backend)
       const tasks = [
         { name: 'Hacer la compra', priority: 'alta' },
