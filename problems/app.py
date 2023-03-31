@@ -43,8 +43,22 @@ tasks = [
 
 # Ruta para obtener todas las tareas
 @app.route('/api/tasks', methods=['GET'])
+
 def get_tasks():
-    return jsonify({'tasks': tasks})
+    tasks = Task.query.all()
+    task_list = []
+    for task in tasks:
+        task_dict = {
+            'id': task.id,
+            'description': task.description,
+            'priority': task.priority,
+            'completed': task.completed,
+            'assignee': task.assignee.name if task.assignee else None,
+            'tags': [tag.name for tag in task.tags]
+        }
+        task_list.append(task_dict)
+    return jsonify({'tasks': task_list})
+
 
 # Ruta para obtener una tarea por su id
 @app.route('/api/tasks/<int:task_id>', methods=['GET'])
@@ -59,25 +73,75 @@ def get_task(task_id):
 def create_task():
     if not request.json or not 'description' in request.json:
         abort(400)
-    task = {
-        'id': tasks[-1]['id'] + 1,
-        'description': request.json['description'],
-        'priority': request.json.get('priority', 'Baja')
+    description = request.json['description']
+    priority = request.json.get('priority', 'Baja')
+    assignee_id = request.json.get('assignee_id')
+    tags = request.json.get('tags', [])
+
+    assignee = None
+    if assignee_id:
+        assignee = Assignee.query.get(assignee_id)
+
+    task = Task(description=description, priority=priority, assignee=assignee)
+
+    for tag_name in tags:
+        tag = Tag(name=tag_name, task=task)
+        db.session.add(tag)
+
+    db.session.add(task)
+    db.session.commit()
+
+    task_dict = {
+        'id': task.id,
+        'description': task.description,
+        'priority': task.priority,
+        'completed': task.completed,
+        'assignee': task.assignee.name if task.assignee else None,
+        'tags': [tag.name for tag in task.tags]
     }
-    tasks.append(task)
-    return jsonify({'task': task}), 201
+
+    return jsonify({'task': task_dict}), 201
+
 
 # Ruta para actualizar una tarea existente
 @app.route('/api/tasks/<int:task_id>', methods=['PUT'])
 def update_task(task_id):
-    task = [task for task in tasks if task['id'] == task_id]
-    if len(task) == 0:
+    task = Task.query.get(task_id)
+    if not task:
         abort(404)
+
     if not request.json:
         abort(400)
-    task[0]['description'] = request.json.get('description', task[0]['description'])
-    task[0]['priority'] = request.json.get('priority', task[0]['priority'])
-    return jsonify({'task': task[0]})
+
+    task.description = request.json.get('description', task.description)
+    task.priority = request.json.get('priority', task.priority)
+
+    assignee_id = request.json.get('assignee_id')
+    if assignee_id:
+        assignee = Assignee.query.get(assignee_id)
+        task.assignee = assignee
+    else:
+        task.assignee = None
+
+    tags = request.json.get('tags', [])
+    task.tags = []
+    for tag_name in tags:
+        tag = Tag(name=tag_name, task=task)
+        db.session.add(tag)
+
+    db.session.commit()
+
+    task_dict = {
+        'id': task.id,
+        'description': task.description,
+        'priority': task.priority,
+        'completed': task.completed,
+        'assignee': task.assignee.name if task.assignee else None,
+        'tags': [tag.name for tag in task.tags]
+    }
+
+    return jsonify({'task': task_dict})
+
 
 # Ruta para eliminar una tarea existente
 @app.route('/api/tasks/<int:task_id>', methods=['DELETE'])
